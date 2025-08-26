@@ -12,6 +12,8 @@
     <script src="https://unpkg.com/element-plus@2.4.2/dist/index.full.js"></script>
     <!-- 引入Element Plus 中文语言包 -->
     <script src="https://unpkg.com/element-plus@2.4.2/dist/locale/zh-cn.js"></script>
+    <!-- 引入Chart.js用于图表展示 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     
     <style>
         * {
@@ -36,7 +38,7 @@
         }
         .content-wrapper {
             flex: 1;
-            padding: 20px;
+            padding: 10px;
             overflow-y: auto;
             background-color: #f5f5f5;
         }
@@ -45,12 +47,14 @@
             text-align: left !important;
             height: 45px !important;
             line-height: 45px !important;
+            font-size: 14px !important;
         }
         /* 一级菜单标题高度和对齐 */
         .el-sub-menu .el-sub-menu__title {
             text-align: left !important;
             height: 45px !important;
             line-height: 45px !important;
+            font-size: 14px !important;
         }
         /* 二级菜单默认靠右缩进10个像素 */
         .el-sub-menu__children {
@@ -62,25 +66,53 @@
         .el-menu-vertical-demo .el-icon {
             color: white !important;
         }
-        /* 图标卡片样式 */
+        /* 数据卡片样式 */
         .icon-card {
             text-align: center;
-            padding: 30px 15px;
+            padding: 5px 10px;
+            height: 90px !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             transition: all 0.3s ease;
         }
         .icon-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-2px);
         }
-        .icon-wrapper {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 36px;
-            color: white;
+        /* 趋势指标样式 */
+        .trend {
+            display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 12px;
+        }
+        .trend-up {
+            background-color: rgba(76, 175, 80, 0.1); color: #4CAF50;
+        }
+        .trend-down {
+            background-color: rgba(244, 67, 54, 0.1); color: #F44336;
+        }
+        /* 图表容器样式 */
+        .chart-container {
+            position: relative; height: 300px; margin: 10px 0;
+        }
+        /* 小表格样式 */
+        .small-table {
+            margin-bottom: 10px;
+        }
+        .small-table .el-card__header {
+            padding: 8px 10px;
+        }
+        .small-table .el-table {
+            font-size: 12px;
+        }
+        .small-table .el-table__header-wrapper th {
+            padding: 6px 0;
+        }
+        .small-table .el-table__body-wrapper td {
+            padding: 8px 0;
+            white-space: nowrap;
+        }
+        .order-no-column {
+            min-width: 140px;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -88,7 +120,7 @@
     <div id="app">
         <el-container class="container">
             <!-- 侧边栏菜单 -->
-            <el-aside width="250px" style="background-color: #000; color: white; height: 100vh;">
+            <el-aside width="200px" style="background-color: #000; color: white; height: 100vh;">
                 <div style="padding: 20px; text-align: center; border-bottom: 1px solid #34495e;">
                     <h2 style="color: white; margin: 0;">WMS仓库管理系统</h2>
                 </div>
@@ -172,56 +204,100 @@
                 
                 <!-- 内容区域 -->
                 <el-main class="content-wrapper">
-                    <!-- 数据概览卡片 - 图标方式 -->
-                    <el-row :gutter="20" style="margin-bottom: 20px;">
+                    <!-- 数据概览卡片 - 带环比趋势 -->
+                    <el-row :gutter="10" style="margin-bottom: 10px;">
                         <el-col :xs="24" :sm="12" :lg="6">
                             <el-card shadow="hover" class="icon-card">
-                                <div class="icon-wrapper" style="background-color: #4CAF50;">
-                                    <el-icon><el-icon-upload /></el-icon>
+                                <div style="text-align: left;">
+                                    <div style="font-size: 14px; color: #666;">待入库订单</div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #333; margin-top: 2px;">89</div>
                                 </div>
-                                <div style="font-size: 28px; font-weight: bold; color: #333;">156</div>
-                                <div style="color: #666; margin-top: 5px;">今日入库量</div>
+                                <div class="trend trend-up">+12% 较昨日</div>
                             </el-card>
                         </el-col>
                         <el-col :xs="24" :sm="12" :lg="6">
                             <el-card shadow="hover" class="icon-card">
-                                <div class="icon-wrapper" style="background-color: #2196F3;">
-                                    <el-icon><el-icon-download /></el-icon>
+                                <div style="text-align: left;">
+                                    <div style="font-size: 14px; color: #666;">待上架任务</div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #333; margin-top: 2px;">45</div>
                                 </div>
-                                <div style="font-size: 28px; font-weight: bold; color: #333;">203</div>
-                                <div style="color: #666; margin-top: 5px;">今日出库量</div>
+                                <div class="trend trend-down">-5% 较昨日</div>
                             </el-card>
                         </el-col>
                         <el-col :xs="24" :sm="12" :lg="6">
                             <el-card shadow="hover" class="icon-card">
-                                <div class="icon-wrapper" style="background-color: #FFC107;">
-                                    <el-icon><el-icon-sold-out /></el-icon>
+                                <div style="text-align: left;">
+                                    <div style="font-size: 14px; color: #666;">待出库订单</div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #333; margin-top: 2px;">124</div>
                                 </div>
-                                <div style="font-size: 28px; font-weight: bold; color: #333;">5,892</div>
-                                <div style="color: #666; margin-top: 5px;">当前库存总量</div>
+                                <div class="trend trend-up">+8% 较昨日</div>
                             </el-card>
                         </el-col>
                         <el-col :xs="24" :sm="12" :lg="6">
                             <el-card shadow="hover" class="icon-card">
-                                <div class="icon-wrapper" style="background-color: #9C27B0;">
-                                    <el-icon><el-icon-document /></el-icon>
+                                <div style="text-align: left;">
+                                    <div style="font-size: 14px; color: #666;">待拣货任务</div>
+                                    <div style="font-size: 20px; font-weight: bold; color: #333; margin-top: 2px;">67</div>
                                 </div>
-                                <div style="font-size: 28px; font-weight: bold; color: #333;">12</div>
-                                <div style="color: #666; margin-top: 5px;">待处理任务</div>
+                                <div class="trend trend-up">+15% 较昨日</div>
                             </el-card>
                         </el-col>
                     </el-row>
                     
-                    <!-- 最近活动 -->
+                    <!-- 30天出入库趋势图 -->
                     <el-card shadow="hover">
                         <template #header>
-                            <div style="font-size: 16px; font-weight: 500;">最近活动</div>
+                            <div style="font-size: 16px; font-weight: 500;">30天出入库趋势</div>
                         </template>
-                        <el-table :data="recentActivities" style="width: 100%;">
-                            <el-table-column prop="activity" label="活动内容" width="auto"></el-table-column>
-                            <el-table-column prop="time" label="时间" width="100" align="right"></el-table-column>
-                        </el-table>
+                        <div class="chart-container">
+                            <canvas id="inventoryTrendChart"></canvas>
+                        </div>
                     </el-card>
+                    
+                    <!-- 待处理订单列表 -->
+                    <el-row :gutter="10" style="margin-top: 10px;">
+                        <!-- 待入库订单列表 -->
+                        <el-col :xs="24" :md="8">
+                            <el-card shadow="hover" class="small-table">
+                                <template #header>
+                                    <div style="font-size: 13px; font-weight: 500;">待入库订单</div>
+                                </template>
+                                <el-table :data="pendingIncomingOrders" size="small" style="width: 100%;">
+                                    <el-table-column prop="orderNo" label="订单号" class-name="order-no-column"></el-table-column>
+                                    <el-table-column prop="supplier" label="供应商" width="80"></el-table-column>
+                                    <el-table-column prop="amount" label="数量" width="60"></el-table-column>
+                                </el-table>
+                            </el-card>
+                        </el-col>
+                        
+                        <!-- 待出库订单列表 -->
+                        <el-col :xs="24" :md="8">
+                            <el-card shadow="hover" class="small-table">
+                                <template #header>
+                                    <div style="font-size: 13px; font-weight: 500;">待出库订单</div>
+                                </template>
+                                <el-table :data="pendingOutgoingOrders" size="small" style="width: 100%;">
+                                    <el-table-column prop="orderNo" label="订单号" class-name="order-no-column"></el-table-column>
+                                    <el-table-column prop="customer" label="客户" width="80"></el-table-column>
+                                    <el-table-column prop="amount" label="数量" width="60"></el-table-column>
+                                </el-table>
+                            </el-card>
+                        </el-col>
+                        
+                        <!-- 待盘点订单列表 -->
+                        <el-col :xs="24" :md="8">
+                            <el-card shadow="hover" class="small-table">
+                                <template #header>
+                                    <div style="font-size: 13px; font-weight: 500;">待盘点订单</div>
+                                </template>
+                                <el-table :data="pendingCheckingOrders" size="small" style="width: 100%;">
+                                    <el-table-column prop="orderNo" label="盘点单号" class-name="order-no-column"></el-table-column>
+                                    <el-table-column prop="warehouse" label="仓库" width="80"></el-table-column>
+                                    <el-table-column prop="status" label="状态" width="60"></el-table-column>
+                                </el-table>
+                            </el-card>
+                        </el-col>
+                    </el-row>
                 </el-main>
             </el-container>
         </el-container>
@@ -244,6 +320,7 @@
         const ElIconDocument = { template: '<i class="el-icon-document"></i>' }
         const ElIconSunrise = { template: '<i class="el-icon-sunrise"></i>' }
         const ElIconSetting = { template: '<i class="el-icon-setting"></i>' }
+        const ElIconBox = { template: '<i class="el-icon-box"></i>' }
         
         createApp({
             components: {
@@ -262,6 +339,7 @@
                 ElIconDocument,
                 ElIconSunrise,
                 ElIconSetting,
+                ElIconBox,
                 ElCard,
                 ElRow,
                 ElCol,
@@ -274,13 +352,28 @@
                 const pageTitle = ref('工作台')
                 const username = ref('guest')
                 
-                // 最近活动数据
-                const recentActivities = reactive([
-                    { activity: '完成入库订单 #RK20231120001', time: '10:23' },
-                    { activity: '处理出库订单 #CK20231120005', time: '09:45' },
-                    { activity: '完成库存盘点 #PD20231120001', time: '08:30' },
-                    { activity: '新增货品 SKU-00123', time: '昨天' },
-                    { activity: '调整库位状态 A1-01-01', time: '昨天' }
+                // 待入库订单数据
+                const pendingIncomingOrders = reactive([
+                    { orderNo: 'RK20231121001', supplier: '供应商A', amount: 150 },
+                    { orderNo: 'RK20231121002', supplier: '供应商B', amount: 89 },
+                    { orderNo: 'RK20231121003', supplier: '供应商C', amount: 210 },
+                    { orderNo: 'RK20231121004', supplier: '供应商A', amount: 67 }
+                ])
+                
+                // 待出库订单数据
+                const pendingOutgoingOrders = reactive([
+                    { orderNo: 'CK20231121001', customer: '客户X', amount: 124 },
+                    { orderNo: 'CK20231121002', customer: '客户Y', amount: 95 },
+                    { orderNo: 'CK20231121003', customer: '客户Z', amount: 180 },
+                    { orderNo: 'CK20231121004', customer: '客户X', amount: 76 }
+                ])
+                
+                // 待盘点订单数据
+                const pendingCheckingOrders = reactive([
+                    { orderNo: 'PD20231121001', warehouse: '主仓库', status: '待盘' },
+                    { orderNo: 'PD20231121002', warehouse: '副仓库', status: '待盘' },
+                    { orderNo: 'PD20231121003', warehouse: '主仓库', status: '待盘' },
+                    { orderNo: 'PD20231121004', warehouse: '危险品库', status: '待盘' }
                 ])
                 
                 // 菜单选择处理
@@ -329,16 +422,107 @@
                     }
                 }
                 
-                // 页面加载时检查登录状态
+                // 生成30天日期标签
+                const generateDateLabels = () => {
+                    const labels = [];
+                    const today = new Date();
+                    for (let i = 29; i >= 0; i--) {
+                        const date = new Date(today);
+                        date.setDate(date.getDate() - i);
+                        labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+                    }
+                    return labels;
+                }
+                
+                // 生成随机出入库数据
+                const generateInventoryData = () => {
+                    const incoming = [];
+                    const outgoing = [];
+                    for (let i = 0; i < 30; i++) {
+                        incoming.push(Math.floor(Math.random() * 100) + 50); // 50-150之间的随机数
+                        outgoing.push(Math.floor(Math.random() * 120) + 60); // 60-180之间的随机数
+                    }
+                    return { incoming, outgoing };
+                }
+                
+                // 初始化图表
+                const initChart = () => {
+                    const ctx = document.getElementById('inventoryTrendChart').getContext('2d');
+                    const labels = generateDateLabels();
+                    const { incoming, outgoing } = generateInventoryData();
+                    
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: '入库量',
+                                    data: incoming,
+                                    backgroundColor: 'rgba(76, 175, 80, 0.6)',
+                                    borderColor: 'rgba(76, 175, 80, 1)',
+                                    borderWidth: 1
+                                },
+                                {
+                                    label: '出库量',
+                                    data: outgoing,
+                                    backgroundColor: 'rgba(33, 150, 243, 0.6)',
+                                    borderColor: 'rgba(33, 150, 243, 1)',
+                                    borderWidth: 1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: '日期'
+                                    },
+                                    ticks: {
+                                        maxRotation: 45,
+                                        minRotation: 45,
+                                        maxTicksLimit: 10
+                                    }
+                                },
+                                y: {
+                                    display: true,
+                                    title: {
+                                        display: true,
+                                        text: '数量'
+                                    },
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // 页面加载时检查登录状态并初始化图表
                 onMounted(() => {
-                    checkLogin()
+                    checkLogin();
+                    initChart();
                 })
                 
                 return {
                     activeMenu,
                     pageTitle,
                     username,
-                    recentActivities,
+                    pendingIncomingOrders,
+                    pendingOutgoingOrders,
+                    pendingCheckingOrders,
                     handleMenuSelect,
                     handleLogout
                 }
