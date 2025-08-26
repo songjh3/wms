@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WMS仓库管理系统</title>
+    <!-- 引入Element Plus CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-plus@2.4.2/dist/index.css">
+    <!-- 引入Vue 3 -->
+    <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.js"></script>
+    <!-- 引入Element Plus JS -->
+    <script src="https://unpkg.com/element-plus@2.4.2/dist/index.full.js"></script>
+    <!-- 引入Element Plus 中文语言包 -->
+    <script src="https://unpkg.com/element-plus@2.4.2/dist/locale/zh-cn.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 顶部标题栏 -->
+        <div class="header">
+            <el-row>
+                <el-col :span="24">
+                    <h1 style="margin: 0; font-size: 2.5rem; font-weight: 500;">WMS仓库管理系统</h1>
+                </el-col>
+            </el-row>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="container">
+            <!-- 欢迎卡片 -->
+            <el-card shadow="hover" style="margin-bottom: 2rem;">
+                <div style="text-align: center; padding: 2rem 0;">
+                    <el-row>
+                        <el-col :span="24">
+                            <h2 style="margin-bottom: 1rem; color: #333;">欢迎使用WMS系统</h2>
+                            <p style="color: #666; margin-bottom: 2rem;">仓库管理系统帮助您高效管理入库、出库、库存等仓库运营流程。</p>
+                            <el-button-group>
+                                <el-button type="primary" @click="showApiInfo">查看API文档</el-button>
+                                <el-button type="success" @click="redirectToLogin">登录系统</el-button>
+                            </el-button-group>
+                        </el-col>
+                    </el-row>
+                </div>
+            </el-card>
+            
+            <!-- API信息卡片 -->
+            <el-card shadow="hover" v-if="showApiSection">
+                <template #header>
+                    <div style="font-size: 18px; font-weight: 500; color: #333;">
+                        API接口文档
+                    </div>
+                </template>
+                <div style="padding: 1rem 0;">
+                    <p style="color: #666; margin-bottom: 1rem;">以下是系统提供的主要API接口:</p>
+                    <el-divider></el-divider>
+                    <el-menu default-active="1" mode="vertical">
+                        <el-menu-item index="1" style="border-bottom: 1px solid #e8e8e8;">
+                            <el-icon><el-icon-upload /></el-icon>
+                            <span>入库管理: /api/incoming/*</span>
+                        </el-menu-item>
+                        <el-menu-item index="2" style="border-bottom: 1px solid #e8e8e8;">
+                            <el-icon><el-icon-download /></el-icon>
+                            <span>出库管理: /api/outgoing/*</span>
+                        </el-menu-item>
+                        <el-menu-item index="3" style="border-bottom: 1px solid #e8e8e8;">
+                            <el-icon><el-icon-sold-out /></el-icon>
+                            <span>库存管理: /api/inventory/*</span>
+                        </el-menu-item>
+                        <el-menu-item index="4" style="border-bottom: 1px solid #e8e8e8;">
+                            <el-icon><el-icon-document /></el-icon>
+                            <span>盘点管理: /api/checking/*</span>
+                        </el-menu-item>
+                        <el-menu-item index="5" style="border-bottom: 1px solid #e8e8e8;">
+                            <el-icon><el-icon-sunrise /></el-icon>
+                            <span>基础数据: /api/masterdata/*</span>
+                        </el-menu-item>
+                        <el-menu-item index="6">
+                            <el-icon><el-icon-setting /></el-icon>
+                            <span>系统管理: /api/system/*</span>
+                        </el-menu-item>
+                    </el-menu>
+                </div>
+            </el-card>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref } = Vue
+        const { ElCard, ElRow, ElCol, ElButton, ElButtonGroup, ElMenu, ElMenuItem, ElIcon, ElDivider, ElMessage } = ElementPlus
+        
+        // 手动定义需要的Element Plus图标组件
+        const ElIconUpload = { template: '<i class="el-icon-upload"></i>' }
+        const ElIconDownload = { template: '<i class="el-icon-download"></i>' }
+        const ElIconSoldOut = { template: '<i class="el-icon-sold-out"></i>' }
+        const ElIconDocument = { template: '<i class="el-icon-document"></i>' }
+        const ElIconSunrise = { template: '<i class="el-icon-sunrise"></i>' }
+        const ElIconSetting = { template: '<i class="el-icon-setting"></i>' }
+        
+        createApp({
+            components: {
+                ElCard,
+                ElRow,
+                ElCol,
+                ElButton,
+                ElButtonGroup,
+                ElMenu,
+                ElMenuItem,
+                ElIcon,
+                ElIconUpload,
+                ElIconDownload,
+                ElIconSoldOut,
+                ElIconDocument,
+                ElIconSunrise,
+                ElIconSetting,
+                ElDivider
+            },
+            setup() {
+                const showApiSection = ref(false)
+                
+                // 显示API信息
+                const showApiInfo = () => {
+                    showApiSection.value = !showApiSection.value
+                }
+                
+                // 重定向到登录页面
+                const redirectToLogin = () => {
+                    window.location.href = '/login.html'
+                }
+                
+                return {
+                    showApiSection,
+                    showApiInfo,
+                    redirectToLogin
+                }
+            }
+        }).use(ElementPlus, {
+            locale: ElementPlusLocaleZhCn
+        }).mount('#app')
+    </script>
+</body>
+</html>

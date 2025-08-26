@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作台 - WMS仓库管理系统</title>
+    <!-- 引入Element Plus CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/element-plus@2.4.2/dist/index.css">
+    <!-- 引入Vue 3 -->
+    <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.js"></script>
+    <!-- 引入Element Plus JS -->
+    <script src="https://unpkg.com/element-plus@2.4.2/dist/index.full.js"></script>
+    <!-- 引入Element Plus 中文语言包 -->
+    <script src="https://unpkg.com/element-plus@2.4.2/dist/locale/zh-cn.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .content-wrapper {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f5f5f5;
+        }
+        /* 一级菜单默认靠左 */
+        .el-menu-item {
+            text-align: left !important;
+            height: 45px !important;
+            line-height: 45px !important;
+        }
+        /* 一级菜单标题高度和对齐 */
+        .el-sub-menu .el-sub-menu__title {
+            text-align: left !important;
+            height: 45px !important;
+            line-height: 45px !important;
+        }
+        /* 二级菜单默认靠右缩进10个像素 */
+        .el-sub-menu__children {
+            padding-left: 0 !important;
+            padding-right: 10px !important;
+            text-align: right;
+        }
+        /* 一级菜单图标使用白色 */
+        .el-menu-vertical-demo .el-icon {
+            color: white !important;
+        }
+        /* 图标卡片样式 */
+        .icon-card {
+            text-align: center;
+            padding: 30px 15px;
+            transition: all 0.3s ease;
+        }
+        .icon-card:hover {
+            transform: translateY(-5px);
+        }
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 36px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-container class="container">
+            <!-- 侧边栏菜单 -->
+            <el-aside width="250px" style="background-color: #000; color: white; height: 100vh;">
+                <div style="padding: 20px; text-align: center; border-bottom: 1px solid #34495e;">
+                    <h2 style="color: white; margin: 0;">WMS仓库管理系统</h2>
+                </div>
+                <el-menu
+                    :default-openeds="[]"
+                    :default-active="activeMenu"
+                    class="el-menu-vertical-demo"
+                    background-color="transparent"
+                    text-color="white"
+                    active-text-color="#4CAF50"
+                    @select="handleMenuSelect"
+                    :unique-opened="true"
+                >
+                    <el-menu-item index="dashboard">
+                        <el-icon><el-icon-location /></el-icon>
+                        <span>工作台</span>
+                    </el-menu-item>
+                    <el-sub-menu index="1">
+                        <template #title>
+                            <el-icon><el-icon-upload /></el-icon>
+                            <span>入库管理</span>
+                        </template>
+                        <el-menu-item index="srm-purchase">SRM采购单</el-menu-item>
+                        <el-menu-item index="incoming-order">入库订单</el-menu-item>
+                        <el-menu-item index="incoming-inspection">入库质检</el-menu-item>
+                    </el-sub-menu>
+                    <el-sub-menu index="2">
+                        <template #title>
+                            <el-icon><el-icon-download /></el-icon>
+                            <span>出库管理</span>
+                        </template>
+                        <el-menu-item index="outgoing-order">出库订单</el-menu-item>
+                        <el-menu-item index="picking-task">拣货任务</el-menu-item>
+                    </el-sub-menu>
+                    <el-sub-menu index="3">
+                        <template #title>
+                            <el-icon><el-icon-sold-out /></el-icon>
+                            <span>库存管理</span>
+                        </template>
+                        <el-menu-item index="inventory-query">库存查询</el-menu-item>
+                        <el-menu-item index="inventory-freeze">库存冻结</el-menu-item>
+                    </el-sub-menu>
+                    <el-sub-menu index="4">
+                        <template #title>
+                            <el-icon><el-icon-document /></el-icon>
+                            <span>盘点管理</span>
+                        </template>
+                        <el-menu-item index="checking-list">盘点单</el-menu-item>
+                    </el-sub-menu>
+                    <el-sub-menu index="5">
+                        <template #title>
+                            <el-icon><el-icon-sunrise /></el-icon>
+                            <span>基础数据</span>
+                        </template>
+                        <el-menu-item index="warehouse">仓库管理</el-menu-item>
+                        <el-menu-item index="goods">货品管理</el-menu-item>
+                    </el-sub-menu>
+                    <el-sub-menu index="6">
+                        <template #title>
+                            <el-icon><el-icon-setting /></el-icon>
+                            <span>系统管理</span>
+                        </template>
+                        <el-menu-item index="users">用户管理</el-menu-item>
+                        <el-menu-item index="roles">角色管理</el-menu-item>
+                    </el-sub-menu>
+                </el-menu>
+            </el-aside>
+            
+            <!-- 主内容区 -->
+            <el-container class="main-content">
+                <!-- 顶部导航栏 - 改为黑色 -->
+                <el-header style="background-color: #000; padding: 0 20px; border-bottom: 1px solid #333;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; height: 100%;">
+                        <h1 style="margin: 0; font-size: 20px; color: white;">{{ pageTitle }}</h1>
+                        <div style="display: flex; align-items: center;">
+                            <span style="margin-right: 20px; color: #ddd;">欢迎，{{ username }}</span>
+                            <el-button type="danger" @click="handleLogout">退出登录</el-button>
+                        </div>
+                    </div>
+                </el-header>
+                
+                <!-- 内容区域 -->
+                <el-main class="content-wrapper">
+                    <!-- 数据概览卡片 - 图标方式 -->
+                    <el-row :gutter="20" style="margin-bottom: 20px;">
+                        <el-col :xs="24" :sm="12" :lg="6">
+                            <el-card shadow="hover" class="icon-card">
+                                <div class="icon-wrapper" style="background-color: #4CAF50;">
+                                    <el-icon><el-icon-upload /></el-icon>
+                                </div>
+                                <div style="font-size: 28px; font-weight: bold; color: #333;">156</div>
+                                <div style="color: #666; margin-top: 5px;">今日入库量</div>
+                            </el-card>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :lg="6">
+                            <el-card shadow="hover" class="icon-card">
+                                <div class="icon-wrapper" style="background-color: #2196F3;">
+                                    <el-icon><el-icon-download /></el-icon>
+                                </div>
+                                <div style="font-size: 28px; font-weight: bold; color: #333;">203</div>
+                                <div style="color: #666; margin-top: 5px;">今日出库量</div>
+                            </el-card>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :lg="6">
+                            <el-card shadow="hover" class="icon-card">
+                                <div class="icon-wrapper" style="background-color: #FFC107;">
+                                    <el-icon><el-icon-sold-out /></el-icon>
+                                </div>
+                                <div style="font-size: 28px; font-weight: bold; color: #333;">5,892</div>
+                                <div style="color: #666; margin-top: 5px;">当前库存总量</div>
+                            </el-card>
+                        </el-col>
+                        <el-col :xs="24" :sm="12" :lg="6">
+                            <el-card shadow="hover" class="icon-card">
+                                <div class="icon-wrapper" style="background-color: #9C27B0;">
+                                    <el-icon><el-icon-document /></el-icon>
+                                </div>
+                                <div style="font-size: 28px; font-weight: bold; color: #333;">12</div>
+                                <div style="color: #666; margin-top: 5px;">待处理任务</div>
+                            </el-card>
+                        </el-col>
+                    </el-row>
+                    
+                    <!-- 最近活动 -->
+                    <el-card shadow="hover">
+                        <template #header>
+                            <div style="font-size: 16px; font-weight: 500;">最近活动</div>
+                        </template>
+                        <el-table :data="recentActivities" style="width: 100%;">
+                            <el-table-column prop="activity" label="活动内容" width="auto"></el-table-column>
+                            <el-table-column prop="time" label="时间" width="100" align="right"></el-table-column>
+                        </el-table>
+                    </el-card>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+
+    <script>
+        // 定义Element Plus图标
+        const { createApp, ref, reactive, onMounted } = Vue
+        const { 
+            ElContainer, ElAside, ElHeader, ElMain, ElMenu, ElSubMenu, 
+            ElMenuItem, ElIcon, ElCard, ElRow, ElCol, ElTable, ElTableColumn, 
+            ElButton, ElMessage 
+        } = ElementPlus
+        
+        // 手动定义需要的Element Plus图标组件
+        const ElIconLocation = { template: '<i class="el-icon-location"></i>' }
+        const ElIconUpload = { template: '<i class="el-icon-upload"></i>' }
+        const ElIconDownload = { template: '<i class="el-icon-download"></i>' }
+        const ElIconSoldOut = { template: '<i class="el-icon-sold-out"></i>' }
+        const ElIconDocument = { template: '<i class="el-icon-document"></i>' }
+        const ElIconSunrise = { template: '<i class="el-icon-sunrise"></i>' }
+        const ElIconSetting = { template: '<i class="el-icon-setting"></i>' }
+        
+        createApp({
+            components: {
+                ElContainer,
+                ElAside,
+                ElHeader,
+                ElMain,
+                ElMenu,
+                ElSubMenu,
+                ElMenuItem,
+                ElIcon,
+                ElIconLocation,
+                ElIconUpload,
+                ElIconDownload,
+                ElIconSoldOut,
+                ElIconDocument,
+                ElIconSunrise,
+                ElIconSetting,
+                ElCard,
+                ElRow,
+                ElCol,
+                ElTable,
+                ElTableColumn,
+                ElButton
+            },
+            setup() {
+                const activeMenu = ref('dashboard')
+                const pageTitle = ref('工作台')
+                const username = ref('guest')
+                
+                // 最近活动数据
+                const recentActivities = reactive([
+                    { activity: '完成入库订单 #RK20231120001', time: '10:23' },
+                    { activity: '处理出库订单 #CK20231120005', time: '09:45' },
+                    { activity: '完成库存盘点 #PD20231120001', time: '08:30' },
+                    { activity: '新增货品 SKU-00123', time: '昨天' },
+                    { activity: '调整库位状态 A1-01-01', time: '昨天' }
+                ])
+                
+                // 菜单选择处理
+                const handleMenuSelect = (index) => {
+                    activeMenu.value = index
+                    // 更新页面标题
+                    const menuMap = {
+                        'dashboard': '工作台',
+                        'srm-purchase': 'SRM采购单',
+                        'incoming-order': '入库订单',
+                        'incoming-inspection': '入库质检',
+                        'outgoing-order': '出库订单',
+                        'picking-task': '拣货任务',
+                        'inventory-query': '库存查询',
+                        'inventory-freeze': '库存冻结',
+                        'checking-list': '盘点单',
+                        'warehouse': '仓库管理',
+                        'goods': '货品管理',
+                        'users': '用户管理',
+                        'roles': '角色管理'
+                    }
+                    pageTitle.value = menuMap[index] || '工作台'
+                }
+                
+                // 退出登录
+                const handleLogout = () => {
+                    // 清除token
+                    localStorage.removeItem('token')
+                    localStorage.removeItem('username')
+                    // 重定向到登录页面
+                    window.location.href = '/login.html'
+                }
+                
+                // 检查登录状态
+                const checkLogin = () => {
+                    const token = localStorage.getItem('token')
+                    // 如果有token，保持在当前页面；如果没有token，重定向到登录页面
+                    if (!token) {
+                        window.location.href = '/login.html'
+                    } else {
+                        // 登录成功后，获取用户名并显示
+                        const savedUsername = localStorage.getItem('username')
+                        if (savedUsername) {
+                            username.value = savedUsername
+                        }
+                    }
+                }
+                
+                // 页面加载时检查登录状态
+                onMounted(() => {
+                    checkLogin()
+                })
+                
+                return {
+                    activeMenu,
+                    pageTitle,
+                    username,
+                    recentActivities,
+                    handleMenuSelect,
+                    handleLogout
+                }
+            }
+        }).use(ElementPlus, {
+            locale: ElementPlusLocaleZhCn
+        }).mount('#app')
+    </script>
+</body>
+</html>
